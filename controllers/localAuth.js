@@ -46,6 +46,7 @@ const signUp = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      provider: 'local',
     });
 
     await newUser.save({ session });
@@ -93,6 +94,9 @@ const signIn = async(req, res) =>{
         if(!isUser){
             return res.status(404).json({message : "User not found, please sign up"})
         }
+        if (isUser.provider !== "local") {
+            return res.status(400).json({message : "Please sign in with Google"})
+        }
         const passwordMatch = await bcrypt.compare(password, isUser.password);
         if(!passwordMatch){
             return res.status(401).json({message : "Invalid credentials, please try again"})
@@ -102,7 +106,7 @@ const signIn = async(req, res) =>{
             process.env.JWT_SECRET, 
             {expiresIn: process.env.JWT_EXPIRY}
         );
-        res.status(201).json({
+        res.status(200).json({
             message: "User signed in successfully",
             user: {
                 id: isUser._id,

@@ -20,6 +20,24 @@ const userSchema = new mongoose.Schema({
         type: String,
         minLength: [8, 'Password must be at least 8 characters long'],
         maxLength: [150, 'Password must be at most 50 characters long'],
+        default: null
+    },
+    provider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local",
+        required: true,
+    },
+    providerId: {
+        type: String,
+        required: false,
+        unique: true,
+        sparse: true
+    },
+    gender: {
+        type: String,
+        enum: ["Male", "Female", "Rather not say"],
+        required: true
     },
     isVerified: {
         type: Boolean,
