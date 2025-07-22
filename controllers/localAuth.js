@@ -10,9 +10,9 @@ const signUp = async (req, res) => {
   try {
     session.startTransaction();
 
-    const { name, email, password } = req.body;
+    const { name, email, password, gender } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !gender) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ message: "All fields are required" });
@@ -47,6 +47,7 @@ const signUp = async (req, res) => {
       email,
       password: hashedPassword,
       provider: 'local',
+      gender,
     });
 
     await newUser.save({ session });
