@@ -181,52 +181,58 @@ const resetPassword = async(req, res) => {
         res.status(500).json({message : "Internal server error, please try again"})    
     }
 }
-const verifyOtp = async(req, res) => {
+const verifyOtp = async (req, res) => {
     try {
-        const {email, otp} = req.body;
+        const { email, otp } = req.body;
 
-        if (!email){
-            return res.status(400).json({message : "Email is required"})
-        }
-
-        const user = await User.findOne({email}).select('isVerified');
-        if (user.isVerified) {
-            return res.status(400).json({message : "User already verified, please sign in"})
-        }
-        if (user.provider !== "local") {
-            return res.status(400).json({message : "Please sign in with Google"})
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
         }
 
-        if (!otp){
-            return res.status(400).json({message : "OTP is required"})
+        if (!otp) {
+            return res.status(400).json({ message: "OTP is required" });
         }
-        const generatedOtp = await User.findOne({email}).select('OTP');
+
+        const user = await User.findOne({ email });
+
         if (!user) {
-            return res.status(404).json({message : "User not found, please sign up"})
-        }
-        if (generatedOtp.OTP !== otp) {
-            return res.status(400).json({message : "Invalid OTP, please try again"})
-        }
-        const currentTime = new Date();
-        if (currentTime > user.expiresIn) {
-            await User.findByIdAndUpdate(
-                {id: user._id},
-                {$unset: {OTP: "", expiresIn: ""}}
-            )
-            return res.status(400).json({message : "OTP has expired, please request a new one"})
+            return res.status(404).json({ message: "User not found, please sign up" });
         }
 
-        await User.findByIdAndUpdate(user._id,{
-            $unset:  {OTP: "", expiresIn: ""},
-            $set: {isVerified: true}
-        })
-        return res.status(200).json({message : "OTP verified successfully"})
+        if (user.isVerified) {
+            return res.status(400).json({ message: "User already verified, please sign in" });
+        }
+
+        if (user.provider !== "local") {
+            return res.status(400).json({ message: "Please sign in with Google" });
+        }
+
+        if (user.OTP !== otp) {
+            return res.status(400).json({ message: "Invalid OTP, please try again" });
+        }
+
+        const currentTime = new Date();
+
+        if (currentTime > user.expiresIn) {
+            await User.findByIdAndUpdate(user._id, {
+                $unset: { OTP: "", expiresIn: "" }
+            });
+            return res.status(400).json({ message: "OTP has expired, please request a new one" });
+        }
+
+        await User.findByIdAndUpdate(user._id, {
+            $unset: { OTP: "", expiresIn: "" },
+            $set: { isVerified: true }
+        });
+
+        return res.status(200).json({ message: "OTP verified successfully" });
 
     } catch (error) {
-        console.log("Error verifying OTP", error.error),
-        res.status(500).json({message : "Internal server error, please try again"})
+        console.error("Error verifying OTP:", error);
+        return res.status(500).json({ message: "Internal server error, please try again" });
     }
-}
+};
+
 const resendOtp = async(req, res) => {
     try {
         const {email} = req.body;

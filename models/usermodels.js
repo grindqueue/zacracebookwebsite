@@ -16,7 +16,9 @@ const userSchema = new mongoose.Schema({
         unique: true,
     },
     password: {
-        required: true,
+        required: function () {
+            return this.provider === 'local';
+        },
         type: String,
         minLength: [8, 'Password must be at least 8 characters long'],
         maxLength: [150, 'Password must be at most 50 characters long'],
@@ -37,7 +39,9 @@ const userSchema = new mongoose.Schema({
     gender: {
         type: String,
         enum: ["Male", "Female", "Rather not say"],
-        required: true
+        required: function () {
+            return this.provider === 'local';
+        }
     },
     isVerified: {
         type: Boolean,
