@@ -78,7 +78,12 @@ const googleCallback = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    return res.status(200).json({ token, name: user.name, email: user.email });
+    return res.status(200).json({ 
+      message: "Google login successful",
+      token, 
+      name: user.name, 
+      email: user.email
+    });
 
   } catch (err) {
     console.error('Google OAuth Error:', err?.response?.data || err.message || err);
