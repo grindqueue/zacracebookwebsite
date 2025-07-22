@@ -132,6 +132,9 @@ const forgetPassword = async(req, res) => {
         if(!userExist) {
             return res.status(404).json({message : "User not found, please sign up"})
         }
+        if (userExist.provider !== "local") {
+            return res.status(400).json({message : "Please sign in with Google"})
+        }
         res.status(200).json({message: "password reset link sent to your mail"})
         const token = jwt.sign(
             {email, id: userExist._id},
@@ -190,6 +193,9 @@ const verifyOtp = async(req, res) => {
         if (user.isVerified) {
             return res.status(400).json({message : "User already verified, please sign in"})
         }
+        if (user.provider !== "local") {
+            return res.status(400).json({message : "Please sign in with Google"})
+        }
 
         if (!otp){
             return res.status(400).json({message : "OTP is required"})
@@ -231,6 +237,9 @@ const resendOtp = async(req, res) => {
         if (!user) {
             return res.status(404).json({message : "User not found, please sign up"})
         }
+        if (user.provider !== "local") {
+            return res.status(400).json({message : "Please sign in with Google"})
+        }   
         const isVerified = await User.findOne({email}).select('isVerified');
         if (isVerified.isVerified) {
             return res.status(400).json({message : "User already verified, please sign in"})
