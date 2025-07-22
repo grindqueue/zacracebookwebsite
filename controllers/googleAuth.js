@@ -33,7 +33,6 @@ const googleCallback = async (req, res) => {
       },
     });
 
-    // ✅ Check if the response contains an error
     if (tokenRes.data.error) {
       console.error("Google Token Error:", tokenRes.data);
       return res.status(400).json({ message: "Token exchange failed", details: tokenRes.data });
