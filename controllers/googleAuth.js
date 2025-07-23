@@ -81,8 +81,13 @@ const googleCallback = async (req, res) => {
     return res.status(200).json({ 
       message: "Google login successful",
       token, 
-      name: user.name, 
-      email: user.email
+      user:{
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        provider: user.provider,
+        isVerified: user.isVerified
+      }
     });
 
   } catch (err) {
