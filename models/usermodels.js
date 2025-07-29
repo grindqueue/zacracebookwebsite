@@ -15,26 +15,36 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         unique: true,
     },
-    password: {
-        required: function () {
-            return this.provider === 'local';
-        },
-        type: String,
-        minLength: [8, 'Password must be at least 8 characters long'],
-        maxLength: [150, 'Password must be at most 50 characters long'],
-        default: null
-    },
     provider: {
         type: String,
         enum: ["local", "google"],
         default: "local",
         required: true,
     },
+    password: {
+        required: function () {
+            return this.provider === 'local';
+        },
+        validate: { 
+            validator: function (v) {
+                if (this.provider === 'local') {
+                    return typeof v === 'string' && v.length >= 8 && v.length <= 150;
+                }
+                return true;
+            }
+        },
+        type: String,
+        message: 'Password must be between 8 and 150 characters long'
+    },
     providerId: {
         type: String,
-        required: false,
         unique: true,
-        sparse: true
+        sparse: true,
+        validate: {
+            validator: function (v) {
+                return this.provider === 'google' ? v != null : true;
+            }
+        },
     },
     gender: {
         type: String,

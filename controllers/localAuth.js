@@ -232,7 +232,6 @@ const verifyOtp = async (req, res) => {
         return res.status(500).json({ message: "Internal server error, please try again" });
     }
 };
-
 const resendOtp = async(req, res) => {
     try {
         const {email} = req.body;
