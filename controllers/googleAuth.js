@@ -26,6 +26,7 @@ const googleCallback = async (req, res) => {
     params.append('code', code);
     params.append('redirect_uri', redirectUri);
     params.append('grant_type', 'authorization_code');
+    console.log("redirectUri", redirectUri);
 
     const tokenRes = await axios.post('https://oauth2.googleapis.com/token', params.toString(), {
       headers: {
