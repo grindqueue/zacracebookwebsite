@@ -10,7 +10,6 @@ const createGoogleLink = (req, res) => {
     res.redirect(url);
 }
 
-
 const googleCallback = async (req, res) => {
   const { code } = req.query;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
@@ -26,7 +25,10 @@ const googleCallback = async (req, res) => {
     params.append('code', code);
     params.append('redirect_uri', redirectUri);
     params.append('grant_type', 'authorization_code');
+
     console.log("redirectUri", redirectUri);
+    console.log("Google Client ID", process.env.GOOGLE_CLIENT_ID);
+    console.log("Google Client Secret", process.env.GOOGLE_CLIENT_SECRET);
 
     const tokenRes = await axios.post('https://oauth2.googleapis.com/token', params.toString(), {
       headers: {
@@ -96,9 +98,6 @@ const googleCallback = async (req, res) => {
     return res.status(500).json({ message: 'Google login failed' });
   }
 };
-
-
-
 module.exports = { 
     createGoogleLink,
     googleCallback 
