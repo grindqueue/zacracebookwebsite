@@ -5,7 +5,7 @@ const axios = require('axios');
 
 const createGoogleLink = (req, res) => {
     const redirectUri = process.env.GOOGLE_REDIRECT_URI;
-    const clientId = process.env.GOOGLE_Client_ID;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
     const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile&access_type=offline&prompt=consent`;
     res.redirect(url);
 }
