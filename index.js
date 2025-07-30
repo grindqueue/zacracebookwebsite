@@ -3,6 +3,9 @@ const database = require('./connectDB/database');
 const cors = require('cors');
 const router = require('./routes/authRouter');
 const app = express();
+const morgan = require('morgan');
+app.use(morgan('dev'));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
