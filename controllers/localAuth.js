@@ -143,7 +143,7 @@ const forgetPassword = async(req, res) => {
             process.env.JWT_SECRET,
             {expiresIn: "10m"}
         )
-        const resetlink = `http://localhost:3000/ebook/auth/reset-password/${token}`;
+        const resetlink = `https://zacrac-e.vercel.app/new-password?token=${token}`;
         sendMail(email, "Zacracebook Password Reset", `Click on the link to reset your password: ${resetlink}. It will expire in 10 minutes.`);
     } catch (error) {
         console.log("Error in forget password", error.error),
