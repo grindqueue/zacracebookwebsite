@@ -82,7 +82,9 @@ const signUp = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    return res.status(500).json({ message: "Internal server error. Please try again." });
+    return res.status(500).json({ 
+        message: "Internal server error. Please try again." || error.message || error.error 
+    });
   }
 };
 const signIn = async(req, res) =>{
