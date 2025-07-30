@@ -162,11 +162,16 @@ const resetPassword = async(req, res) => {
         if (!newPassword ||!confirmPassword){
             return res.status(400).json({message : "All fields are required"})
         }
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
 
         if (newPassword !== confirmPassword) {
             return res.status(400).json({message : "Passwords do not match"})
         }
-        
+        if (!passwordRegex.test(newPassword)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number." });
+        }
         const user = await User.findById(decoded.id);
         if (!user) {
             return res.status(404).json({message : "User not found, Invalid or expired token"})
@@ -184,7 +189,7 @@ const resetPassword = async(req, res) => {
         )
         res.status(200).json({message : "Password reset successfully"})
     } catch (error) {
-        console.log("Error in reset password", error.error),
+        console.log("Error in reset password", error.message || error.error),
         res.status(500).json({message : "Internal server error, please try again"})    
     }
 }
