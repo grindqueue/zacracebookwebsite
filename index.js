@@ -2,6 +2,7 @@ const express = require('express');
 const database = require('./connectDB/database');
 const cors = require('cors');
 const router = require('./routes/authRouter');
+const productRouter = require('./routes/product');  
 const app = express();
 const morgan = require('morgan');
 app.use(morgan('dev'));
@@ -24,3 +25,4 @@ app.listen(3001, () => {
 });
 
 app.use('/ebook/auth', router);
+app.use('/ebook/product', productRouter);

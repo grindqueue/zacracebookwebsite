@@ -53,6 +53,20 @@ const userSchema = new mongoose.Schema({
             return this.provider === 'local';
         }
     },
+    orders:[{
+        type: mongoose.Types.ObjectId,
+        ref: 'Order',
+        required: false
+    }],
+    cart: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Cart',
+        required: false
+    },
+    role: {
+        type: String,
+        enum: ["Admin", "Buyer", "Seller"]
+    },
     isVerified: {
         type: Boolean,
         default: false,
@@ -68,6 +82,7 @@ const userSchema = new mongoose.Schema({
         default: null,
         required: false
     }
+
 },{
     timestamps : true
 });
