@@ -25,4 +25,4 @@ app.listen(3001, () => {
 });
 
 app.use('/ebook/auth', router);
-app.use('/ebook/product', productRouter);
+app.use('/ebook/products', productRouter);

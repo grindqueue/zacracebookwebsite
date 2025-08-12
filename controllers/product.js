@@ -22,7 +22,22 @@ const addCategory = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 }
+const fetchCategories = async (req, res) => {
+    try{
+        const categories = await Category.find().select('name -_id');
+        if (!categories || categories.length === 0) {
+            return res.status(404).json({ error: 'No categories found' });
+        }
+        res.status(200).json({
+            categories: categories.map(category => category.name)
+        });
+    }catch{
+        console.error(error.error || error.message || 'Error fetching categories');
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 module.exports = {
-    addCategory
+    addCategory,
+    fetchCategories
 }
