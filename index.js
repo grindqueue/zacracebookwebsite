@@ -2,7 +2,9 @@ const express = require('express');
 const database = require('./connectDB/database');
 const cors = require('cors');
 const router = require('./routes/authRouter');
-const productRouter = require('./routes/product');  
+const productRouter = require('./routes/productRouter');  
+const reviewRouter = require('./routes/ratingRouter');
+const isAuthenticated = require('./middlewares/isAuth');
 const app = express();
 const morgan = require('morgan');
 app.use(morgan('dev'));
@@ -26,3 +28,7 @@ app.listen(3001, () => {
 
 app.use('/ebook/auth', router);
 app.use('/ebook/products', productRouter);
+app.use('/review', reviewRouter);
+app.get("/api/me", isAuthenticated, (req, res) => {
+  res.json({ user: req.user });
+});

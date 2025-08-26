@@ -48,6 +48,7 @@ const signUp = async (req, res) => {
       password: hashedPassword,
       provider: 'local',
       gender,
+      role: 'Buyer'
     });
 
     await newUser.save({ session });

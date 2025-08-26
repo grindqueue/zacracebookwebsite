@@ -9,15 +9,29 @@ const ratingSchema = new mongoose.Schema({
     rating: {
         type: Number,
         required: true,
-        min: 1,
-        max: 5,
+        enum: [1, 2, 3, 4, 5]
     },
     comment: {
         type: String,
         required: false,
         minLength: [1, "comments must have at least one character"],
         maxLength: [500, "Comment must not exceed 500 chracters"]
-    }
+    },
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    }],
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
+    },
+    dislikes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: false
+    }]
 },{
     timestamps: true
 })

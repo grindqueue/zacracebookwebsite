@@ -63,6 +63,11 @@ const userSchema = new mongoose.Schema({
         ref: 'Cart',
         required: false
     },
+    ratings: [{
+        type: mongoose.Types.ObjectId,
+        ref: 'Rating',
+        required: false
+    }],
     role: {
         type: String,
         enum: ["Admin", "Buyer", "Seller"]
