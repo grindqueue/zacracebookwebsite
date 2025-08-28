@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
-const orderDetails = require('./orderDetails');
 
-
-const orderSchema = mongoose.Schema({
+const orderSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -11,16 +9,25 @@ const orderSchema = mongoose.Schema({
     orderDetails: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'OrderDetails',
-        required: false
     }],
     totalPrice: {
         type: Number,
         required: true,
     },
-    transactionId: {
+    reference: {
         type: String,
         required: true,
         unique: true
+    },
+    status: {  
+        type: String,
+        enum: ["completed", "failed", "pending"],
+        default: "pending",
+    },
+    format: {
+        type: String,
+        enum: ["ebook", "audiobook"],
+        required: true,
     }
 }, {
     timestamps: true

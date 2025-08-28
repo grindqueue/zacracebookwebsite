@@ -77,8 +77,18 @@ const googleCallback = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    return res.redirect(`https://Zacrac-e.vercel.app/?token=${token}`);
-
+    // return res.redirect(`https://Zacrac-e.vercel.app/?token=${token}`);
+    res.status(200).json({ 
+      message: "Login successful", 
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isVerified: user.isVerified
+      }
+     });
   } catch (err) {
     console.error('Google OAuth Error:', err?.response?.data || err.message || err);
     return res.status(500).json({ message: 'Google login failed' });

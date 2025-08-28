@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema({
             }
         },
     },
+    
     gender: {
         type: String,
         enum: ["Male", "Female", "Rather not say"],
@@ -56,7 +57,23 @@ const userSchema = new mongoose.Schema({
     orders:[{
         type: mongoose.Types.ObjectId,
         ref: 'Order',
-        required: false
+        required: false,
+    }],
+    purchasedBooks: [{
+        product: {
+            type: mongoose.Types.ObjectId,
+            ref: "Product",
+            required: true
+        },
+        formatType: {
+            type: String,
+            enum: ["ebook", "audiobook"],
+            required: true
+        },
+        purchasedAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     cart: {
         type: mongoose.Types.ObjectId,
