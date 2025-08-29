@@ -73,18 +73,16 @@ const addProduct = async (req, res) => {
 const getHomepageProducts = async (req, res) => {
   try {
     const categories = await Category.find()
-      .select("name products") // only keep name & products from Category
+      .select("name products")
       .populate({
         path: "products",
         model: "Product",
-        select: "title author coverImageUrl averageReview totalRatings formats", // only fetch needed fields
+        select: "title author coverImageUrl averageReview totalRatings formats",
       });
 
-    // Optionally map formats to only send the cheapest price per product
     const formattedCategories = categories.map(category => ({
       name: category.name,
       products: category.products.map(product => {
-        // find the minimum price from formats (ebook or audiobook)
         const minPrice = Math.min(...product.formats.map(f => f.price));
         return {
           _id: product._id,
@@ -112,7 +110,7 @@ const getProductFullDetails = async (req, res) => {
   try {
     const { productId } = req.params;
 
-    const product = await Product.findById(productId)
+    const product = await Product.findById(productId).select('-fileUrl')
       .populate('category', 'name')
       .populate({
         path: 'ratings',

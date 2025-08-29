@@ -2,7 +2,6 @@ const axios = require('axios');
 const Order = require('../models/ordermodel');
 const User = require('../models/usermodels');
 const Product = require('../models/productmodel');
-const orderDetails = require('../models/orderDetails');
 require('dotenv').config();
 
 const initiatePayment = async (req, res) => {
@@ -43,11 +42,11 @@ const initiatePayment = async (req, res) => {
       {
         email,
         amount: amountInKobo,
-        callback_url: `${process.env.BACKEND_URL}/api/payments/verify?productId=${productId}&formatType=${formatType}`
+        callback_url: `http://localhost:3001/verify-payment?productId=${productId}&formatType=${formatType}`
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.PAYSTACK_TEST_SECRET_KEY}`,
           'Content-Type': 'application/json'
         }
       }
@@ -59,8 +58,10 @@ const initiatePayment = async (req, res) => {
       const newOrder = new Order({
         user: user._id,
         product: productDetails._id,
-        totalPrice: price,
+        price: price,
         reference,
+        status: "pending",
+        quantity: 1,
         format: formatType
       });
 
@@ -77,22 +78,23 @@ const initiatePayment = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 const verifyPayment = async (req, res) => {
   try {
     const { reference, productId, formatType } = req.query;
 
     const response = await axios.get(
       `https://api.paystack.co/transaction/verify/${reference}`,
-      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } }
-    );
+      { headers: { Authorization: `Bearer ${process.env.PAYSTACK_TEST_SECRET_KEY}` } });
 
     const product = await Product.findById(productId);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
     const paymentData = response.data.data;
 
+    console.log("Full Payment Data:", paymentData);
+    console.log("Payment Status:", paymentData.status);
     if (paymentData.status === "success") {
+      console.log("order reference:", reference);
       const order = await Order.findOneAndUpdate(
         { reference: reference },
         { status: "completed" },
@@ -111,14 +113,7 @@ const verifyPayment = async (req, res) => {
         }
       });
 
-      await product.updateOne({ $inc: { salesCount: 1 } });
-      s
-      await orderDetails.create({
-        product: productId,
-        quantity: 1,
-        price: order.totalPrice,
-        order: order._id
-      });
+      await product.updateOne({ $inc: { amountSold: 1 } });
 
       return res.status(200).json({ message: "Payment verified and product added" });
     }

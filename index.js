@@ -36,7 +36,7 @@ app.listen(3001, () => {
 app.use('/ebook/auth', router);
 app.use('/ebook/products', productRouter);
 app.use('/review', reviewRouter);
-app.use('/payment', paymentRouter);
+app.use(paymentRouter);
 
 
 app.get("/api/me", isAuthenticated, (req, res) => {

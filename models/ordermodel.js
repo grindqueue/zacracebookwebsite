@@ -6,18 +6,24 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
-    orderDetails: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'OrderDetails',
-    }],
-    totalPrice: {
+    product: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Product',
+        required: true
+    },
+    quantity: {
         type: Number,
         required: true,
+        default: 1
     },
     reference: {
         type: String,
         required: true,
         unique: true
+    },
+    price: {
+        type: Number,
+        required: true,
     },
     status: {  
         type: String,
