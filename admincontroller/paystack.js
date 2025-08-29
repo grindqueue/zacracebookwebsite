@@ -6,8 +6,18 @@ require('dotenv').config();
 
 const initiatePayment = async (req, res) => {
   try {
-    const { email, price, formatType } = req.body;
+    const { email, formatType } = req.body;
     const productId = req.params.id;
+    
+    const productDetails = await Product.findById(productId);
+    if (!productDetails) return res.status(404).json({ error: 'Product not found' });
+
+    const format = productDetails.formats.find(f => f.formatType === formatType);
+    if (!format) {
+      return res.status(400).json({ error: `Format ${formatType} not available for this product` });
+    }
+    const price = format.price;
+
 
     if (!productId || !email || !price || !formatType) {
       return res.status(400).json({ error: 'Product ID, email, price, and formatType are required' });
@@ -21,8 +31,7 @@ const initiatePayment = async (req, res) => {
       return res.status(400).json({ error: 'Invalid formatType. Must be either "ebook" or "audiobook"' });
     }
 
-    const productDetails = await Product.findById(productId);
-    if (!productDetails) return res.status(404).json({ error: 'Product not found' });
+
 
     const user = await User.findOne({ email }).populate("purchasedBooks.product");
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -42,7 +51,7 @@ const initiatePayment = async (req, res) => {
       {
         email,
         amount: amountInKobo,
-        callback_url: `http://localhost:3001/verify-payment?productId=${productId}&formatType=${formatType}`
+        callback_url: `https://zacracebookwebsite.onrender.com/verify-payment?productId=${productId}&formatType=${formatType}`
       },
       {
         headers: {
