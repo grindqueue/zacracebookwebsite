@@ -6,6 +6,8 @@ const router = require('./routes/authRouter');
 const productRouter = require('./routes/productRouter');  
 const reviewRouter = require('./routes/ratingRouter');
 const paymentRouter = require('./routes/paymentRouter.js')
+const adminRouter = require('./routes/adminRouter');
+const userRouter = require('./routes/userRouter');
 
 
 const isAuthenticated = require('./middlewares/isAuth');
@@ -37,7 +39,8 @@ app.use('/ebook/auth', router);
 app.use('/ebook/products', productRouter);
 app.use('/review', reviewRouter);
 app.use(paymentRouter);
-
+app.use(adminRouter);
+app.use('/user', userRouter);
 
 app.get("/api/me", isAuthenticated, (req, res) => {
   res.json({ user: req.user });

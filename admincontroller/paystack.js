@@ -122,7 +122,11 @@ const verifyPayment = async (req, res) => {
         }
       });
 
-      await product.updateOne({ $inc: { amountSold: 1 } });
+      await Product.updateOne(
+        { _id: product._id },
+        { $inc: { amountSold: 1 } }
+      );
+
 
       return res.status(200).json({ message: "Payment verified and product added" });
     }
