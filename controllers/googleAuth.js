@@ -68,6 +68,7 @@ const googleCallback = async (req, res) => {
         provider: 'google',
         providerId,
         isVerified: true,
+        role: 'Buyer'
       });
     }
 

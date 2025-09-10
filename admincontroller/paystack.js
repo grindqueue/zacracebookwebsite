@@ -12,7 +12,7 @@ const initiatePayment = async (req, res) => {
     const productDetails = await Product.findById(productId);
     if (!productDetails) return res.status(404).json({ error: 'Product not found' });
 
-    const format = productDetails.formats.find(f => f.formatType === formatType);
+    const format = productDetails.formats.find(f => f.type === formatType);
     if (!format) {
       return res.status(400).json({ error: `Format ${formatType} not available for this product` });
     }

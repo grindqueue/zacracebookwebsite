@@ -10,10 +10,10 @@ productRouter.post('/add-category', addCategory);
 productRouter.get('/category',isAdmin, fetchCategories)
 
 
-productRouter.post('/add-product', isAdmin, isAuthenticated, uploadMiddleware, addProduct);
-productRouter.put('/edit-product', isAdmin, isAuthenticated, uploadMiddleware, editProduct);
-productRouter.delete('/delete-product', isAdmin, isAuthenticated, uploadMiddleware, deleteProduct);
-productRouter.get('/search', isAdmin, isAuthenticated, searchProduct)
+productRouter.post('/add-product', isAuthenticated, isAdmin, uploadMiddleware, addProduct);
+productRouter.put('/edit-product', isAuthenticated, isAdmin, uploadMiddleware, editProduct);
+productRouter.delete('/delete-product', isAuthenticated, isAdmin, uploadMiddleware, deleteProduct);
+productRouter.get('/search-product', isAuthenticated, isAdmin, searchProduct)
 productRouter.get('/shop',getHomepageProducts);
 productRouter.get('/:productId', getProductFullDetails);
 

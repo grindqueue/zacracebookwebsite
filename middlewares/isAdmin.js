@@ -2,12 +2,12 @@ const User = require('../models/usermodels');
 
 const isAdmin = async (req, res, next) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user._id;
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        if (user.role !== 'admin') {
+        if (user.role !== 'Admin') {
             return res.status(403).json({ message: "Access denied. Admins only." });
         }
         next();

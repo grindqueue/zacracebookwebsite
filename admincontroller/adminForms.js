@@ -1,6 +1,9 @@
 const Product = require('../models/productmodel')
 const User = require('../models/usermodels')
-const Order = require('../models/ordermodel')
+const Order = require('../models/ordermodel') 
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken');
+require('dotenv').config()
 
 const getPurchasedBooks = async (req, res) => {
   try {
@@ -41,7 +44,7 @@ const getPurchasedBooks = async (req, res) => {
 };
 const getAdminDetailsPage = async (req, res) => {
   try {
-    const userId = req.query.id;
+    const userId = req.user._id;
     const userExists = await User.findById(userId);
     if (!userExists) {
       return res.status(404).json({ message: "User not found" });
@@ -73,8 +76,53 @@ const getAdminDetailsPage = async (req, res) => {
     });
   }
 };
+const adminSignin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
 
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        const foundUser = await User.findOne({ email });
+
+        if (!foundUser) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+        if(foundUser.provider !== 'local') {
+            return res.status(403).json({ message: "Please sign in with Google" });
+        }
+        const passwordMatch = await bcrypt.compare(password, foundUser.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+        if (foundUser.role !== "Admin") {
+            return res.status(403).json({ message: "Access denied, not an admin" });
+        }
+
+        const token = jwt.sign(
+            { userId: foundUser._id, email: foundUser.email },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRY }
+        );
+
+        return res.status(200).json({
+            _id: foundUser._id,
+            name: foundUser.name,
+            email: foundUser.email,
+            token,
+            isVerified: foundUser.isVerified,
+            isAdmin: foundUser.isAdmin,
+            message: "Admin signed in successfully"
+        });
+
+    } catch (error) {
+        console.error("Error during signin:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
 module.exports = {
     getPurchasedBooks,
-    getAdminDetailsPage
+    getAdminDetailsPage,
+    adminSignin
 };

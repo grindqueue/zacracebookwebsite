@@ -231,11 +231,11 @@ const searchProduct = async (req, res) => {
     if (!searchTerm) {
       return res.status(400).json({ message: "Search term is required" });
     }
-
     const productFound = await Product.findOne({
       title: { $regex: searchTerm, $options: "i" },
-    }).populate("category", "name");
-
+    })
+    .populate("category", "name")
+    .select('-ratings')
     if (!productFound) {
       return res.status(404).json({ message: "Product not found" });
     }
