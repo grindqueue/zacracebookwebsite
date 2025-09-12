@@ -7,7 +7,7 @@ const isAuthenticated= require('../middlewares/isAuth.js')
 const { isAdmin } = require('../middlewares/isAdmin.js')
 // category routes
 productRouter.post('/add-category', addCategory);
-productRouter.get('/category',isAdmin, fetchCategories)
+productRouter.get('/category',isAuthenticated, isAdmin, fetchCategories)
 
 
 productRouter.post('/add-product', isAuthenticated, isAdmin, uploadMiddleware, addProduct);

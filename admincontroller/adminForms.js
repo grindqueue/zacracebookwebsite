@@ -3,6 +3,8 @@ const User = require('../models/usermodels')
 const Order = require('../models/ordermodel') 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
+const order = require('../models/ordermodel')
+const Category = require('../models/category')
 require('dotenv').config()
 
 const getPurchasedBooks = async (req, res) => {
@@ -121,8 +123,97 @@ const adminSignin = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+const getAdminDashboard = async (req, res) => {
+  try {
+    // 1. Total Users
+    const totalUsers = await User.countDocuments();
+
+    // 2. Successful Orders (populate product with category)
+    const completedOrders = await Order.find({ status: "completed" })
+      .populate({
+        path: "product",
+        select: "category",
+        populate: { path: "category", select: "name" }
+      });
+
+    // 3. Revenue + total format breakdown
+    let totalRevenue = 0;
+    let ebookSold = 0;
+    let audiobookSold = 0;
+
+    for (const order of completedOrders) {
+      totalRevenue += order.price * order.quantity;
+      if (order.format === "ebook") {
+        ebookSold += order.quantity;
+      } else if (order.format === "audiobook") {
+        audiobookSold += order.quantity;
+      }
+    }
+
+    // 4. Available Products (count formats)
+    let availableEbook = 0;
+    let availableAudiobook = 0;
+
+    const availableProducts = await Product.find();
+    for (const eachProduct of availableProducts) {
+      for (const format of eachProduct.formats) {
+        if (format.type === "ebook") {
+          availableEbook += 1;
+        } else if (format.type === "audiobook") {
+          availableAudiobook += 1;
+        }
+      }
+    }
+
+    // 5. Category Sales
+    const categories = await Category.find().select("_id name");
+
+    // build stats object for quick lookup
+    let categorySales = categories.map(cat => ({
+      categoryId: cat._id,
+      categoryName: cat.name,
+      formats: { ebook: 0, audiobook: 0 }
+    }));
+
+    for (const order of completedOrders) {
+      if (!order.product || !order.product.category) continue;
+
+      const categoryStat = categorySales.find(
+        cat => cat.categoryId.toString() === order.product.category._id.toString()
+      );
+
+      if (categoryStat) {
+        if (order.format === "ebook") {
+          categoryStat.formats.ebook += order.quantity;
+        } else if (order.format === "audiobook") {
+          categoryStat.formats.audiobook += order.quantity;
+        }
+      }
+    }
+
+    // 6. Response
+    res.status(200).json({
+      users: totalUsers,
+      revenue: totalRevenue,
+      ebook: {
+        amountSold: ebookSold,
+        available: availableEbook,
+      },
+      audiobook: {
+        amountSold: audiobookSold,
+        available: availableAudiobook,
+      },
+      amountSold: categorySales,
+    });
+
+  } catch (error) {
+    console.error(error.message || "Something went wrong while getting admin dashboard");
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 module.exports = {
     getPurchasedBooks,
     getAdminDetailsPage,
-    adminSignin
+    adminSignin,
+    getAdminDashboard
 };
