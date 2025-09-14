@@ -16,7 +16,7 @@ const isAuthenticated = async (req, res, next) => {
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    console.log("Decoded token:", decoded);
 
     req.user = await User.findById(decoded.id).select('-password');
     if (!req.user) {
@@ -26,7 +26,6 @@ const isAuthenticated = async (req, res, next) => {
     if (req.query.user && req.query.user !== decoded.id) {
       return res.status(403).json({ message: "User mismatch, forbidden" });
     }
-
     next();
   } catch (error) {
     console.error("Authentication error:", error);

@@ -5,6 +5,8 @@ require('dotenv').config();
 const { sendMail, generateOtp } = require('./sendmail');
 const mongoose = require('mongoose');
 
+
+
 const signUp = async (req, res) => {
   const session = await mongoose.startSession();
   try {
@@ -106,9 +108,9 @@ const signIn = async(req, res) =>{
             return res.status(401).json({message : "Invalid credentials, please try again"})
         }
         const token = jwt.sign(
-            {email, id : isUser._id}, 
-            process.env.JWT_SECRET, 
-            {expiresIn: process.env.JWT_EXPIRY}
+            { email, id: isUser._id },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRY }
         );
         res.status(200).json({
             message: "User signed in successfully",
@@ -118,7 +120,8 @@ const signIn = async(req, res) =>{
                 email: isUser.email,
                 isVerified: isUser.isVerified
             },
-            token: token
+            token: token,
+            decodedToken
         })
     } catch (error) {
         console.log("Error signing in", error.error),

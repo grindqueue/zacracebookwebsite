@@ -3,8 +3,9 @@ const User = require('../models/usermodels')
 const Order = require('../models/ordermodel') 
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
-const order = require('../models/ordermodel')
 const Category = require('../models/category')
+const axios = require('axios');
+
 require('dotenv').config()
 
 const getPurchasedBooks = async (req, res) => {
@@ -103,7 +104,7 @@ const adminSignin = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: foundUser._id, email: foundUser.email },
+            { id: foundUser._id, email: foundUser.email },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRY }
         );
@@ -211,9 +212,83 @@ const getAdminDashboard = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+const getTransactionHistory = async (req, res) => {
+  try{
+    const userId = req.params.userId;
+    const user = await User.findById(userId)
+    if(!user){
+      return res.status(404).json({ message: "User not found" });
+    }
+    const transactions = await Order.find({ user: userId })
+    .populate('product', 'title author coverImageUrl')
+    .sort({ createdAt: -1 });
+    res.status(200).json({ transactions });
+  }catch{
+    console.log(error.message || "Something went wrong while getting transaction history");
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+const streamBookFile = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const formatType = req.query.format;
+    const userId = req.query.user;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!formatType || !["ebook", "audiobook"].includes(formatType)) {
+      return res.status(400).json({ message: "Invalid or missing format type" });
+    }
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const hasPurchased = user.purchasedBooks.some(purchase => 
+      purchase.product.toString() === productId && purchase.formatType === formatType
+    );
+    if (!hasPurchased) {
+      return res.status(403).json({ message: "Access denied. You have not purchased this book in the requested format." });
+    }
+    const format = product.formats.find(f => f.type === formatType);
+    if (!format || !format.fileUrl) {
+      return res.status(404).json({ message: `File for format ${formatType} not found` });
+    }
+
+    const fileUrl = format.fileUrl.replace(/\+/g, '%20');
+    const response = await axios.get(fileUrl, { responseType: "stream" });
+    if (format === "ebook") {
+      res.setHeader("Content-Type", "application/pdf");
+    } else if (format === "audiobook") {
+      res.setHeader("Content-Type", "audio/mpeg");
+    } else {
+      return res.status(400).json({ error: "Unsupported format" });
+    }
+
+    res.setHeader("Content-Disposition", "inline");
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+  }catch (error) {
+    if (error.response) {
+      console.error("Axios error:", {
+        status: error.response.status,
+        headers: error.response.headers,
+        data: error.response.data?.toString().slice(0, 200) // preview only
+      });
+    } else {
+      console.error("General error:", error.message);
+    }
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
 module.exports = {
     getPurchasedBooks,
     getAdminDetailsPage,
     adminSignin,
-    getAdminDashboard
+    getAdminDashboard,
+    getTransactionHistory,
+    streamBookFile
 };

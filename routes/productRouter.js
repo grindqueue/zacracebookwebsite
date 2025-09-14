@@ -11,7 +11,7 @@ productRouter.get('/category',isAuthenticated, isAdmin, fetchCategories)
 
 
 productRouter.post('/add-product', isAuthenticated, isAdmin, uploadMiddleware, addProduct);
-productRouter.put('/edit-product', isAuthenticated, isAdmin, uploadMiddleware, editProduct);
+productRouter.put('/edit-product/:productId', isAuthenticated, isAdmin, uploadMiddleware, editProduct);
 productRouter.delete('/delete-product', isAuthenticated, isAdmin, uploadMiddleware, deleteProduct);
 productRouter.get('/search-product', isAuthenticated, isAdmin, searchProduct)
 productRouter.get('/shop',getHomepageProducts);
