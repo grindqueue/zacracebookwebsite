@@ -260,17 +260,12 @@ const streamBookFile = async (req, res) => {
 
     const fileUrl = format.fileUrl.replace(/\+/g, '%20');
     const response = await axios.get(fileUrl, { responseType: "stream" });
-    if (format === "ebook") {
-      res.setHeader("Content-Type", "application/pdf");
-    } else if (format === "audiobook") {
-      res.setHeader("Content-Type", "audio/mpeg");
-    } else {
-      return res.status(400).json({ error: "Unsupported format" });
-    }
+    res.setHeader("Content-Type", response.headers["content-type"] || "application/octet-stream");
 
     res.setHeader("Content-Disposition", "inline");
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("X-Content-Type-Options", "nosniff");
+    response.data.pipe(res);
   }catch (error) {
     if (error.response) {
       console.error("Axios error:", {

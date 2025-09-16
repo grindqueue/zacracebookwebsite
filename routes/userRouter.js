@@ -5,7 +5,7 @@ const { getPurchasedBooks, getTransactionHistory, streamBookFile } = require('..
 
 
 userRouter.get('/transactions/:userId', isAuthenticated, getTransactionHistory)
-userRouter.get('/stream-book/:productId', isAuthenticated, streamBookFile);
+userRouter.get('/stream-book/:productId', streamBookFile);
 userRouter.get('/purchased-books/:userId', getPurchasedBooks);
 
 module.exports = userRouter;
