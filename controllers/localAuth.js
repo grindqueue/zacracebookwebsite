@@ -121,10 +121,9 @@ const signIn = async(req, res) =>{
                 isVerified: isUser.isVerified
             },
             token: token,
-            decodedToken
         })
     } catch (error) {
-        console.log("Error signing in", error.error),
+        console.log("Error signing in", error),
         res.status(500).json({message : "Internal server error, please try again"})
     }
 }
