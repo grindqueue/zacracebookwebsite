@@ -18,7 +18,7 @@ const getPurchasedBooks = async (req, res) => {
       })
       .populate({
         path: "product",
-        select: "title author coverImageUrl formats"
+        select: "_id title author coverImageUrl formats"
       });
 
     if (!completedOrders || completedOrders.length === 0) {
@@ -26,6 +26,7 @@ const getPurchasedBooks = async (req, res) => {
     }
 
     const purchases = completedOrders.map(order => ({
+      productId: order.product?._id, 
       title: order.product?.title,
       author: order.product?.author,
       coverImageUrl: order.product?.coverImageUrl,
