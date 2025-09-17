@@ -4,6 +4,7 @@ const User = require('../models/usermodels');
 const Product = require('../models/productmodel');
 require('dotenv').config();
 
+
 const initiatePayment = async (req, res) => {
   try {
     const { email, formatType } = req.body;

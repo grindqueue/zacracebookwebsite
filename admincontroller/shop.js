@@ -224,32 +224,6 @@ const editProduct = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-const searchProduct = async (req, res) => {
-  try {
-    const searchTerm = req.query.search;
-
-    if (!searchTerm) {
-      return res.status(400).json({ message: "Search term is required" });
-    }
-    const productFound = await Product.findOne({
-      title: { $regex: searchTerm, $options: "i" },
-    })
-    .populate("category", "name")
-    .select('-ratings')
-    if (!productFound) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    res.status(200).json({
-      result: productFound,
-    });
-  } catch (error) {
-    console.error(error.message || "Something went wrong when searching for products");
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
 const deleteProduct = async(req, res) => {
   try {
     const productId = req.query.productId
@@ -277,6 +251,32 @@ const deleteProduct = async(req, res) => {
     })
   }
 }
+const searchProduct = async (req, res) => {
+  try {
+    const searchTerm = req.query.search;
+
+    if (!searchTerm) {
+      return res.status(400).json({ message: "Search term is required" });
+    }
+    const productFound = await Product.findOne({
+      title: { $regex: searchTerm, $options: "i" },
+    })
+    .populate("category", "name")
+    .select('-ratings')
+    if (!productFound) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({
+      result: productFound,
+    });
+  } catch (error) {
+    console.error(error.message || "Something went wrong when searching for products");
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
 module.exports = { 
     addProduct,
     getHomepageProducts,

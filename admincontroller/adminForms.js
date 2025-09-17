@@ -279,6 +279,40 @@ const streamBookFile = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+const streamBookFileWithPreview = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    const formatType = req.query.format;
+    const userId = req.query.user;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (!formatType || !["ebook", "audiobook"].includes(formatType)) {
+      return res.status(400).json({ message: "Invalid or missing format type" });
+    }
+    const product = await Product.findById(productId);  
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    const hasPurchased = user.purchasedBooks.some(purchase => 
+      purchase.product.toString() === productId && purchase.formatType === formatType
+    );
+    if (!hasPurchased) {
+      return res.status(403).json({ message: "Access denied. You have not purchased this book in the requested format." });
+    }
+    const format = product.formats.find(f => f.type === formatType);
+    if (!format || !format.fileUrl) {
+      return res.status(404).json({ message: `File for format ${formatType} not found` });
+    }
+    const fileUrl = format.fileUrl.replace(/\+/g, '%20');
+    return res.status(200).json({ previewUrl: fileUrl });
+  } catch (error) {
+    console.error("Error in streamBookFileWithPreview:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
 module.exports = {
     getPurchasedBooks,
     getAdminDetailsPage,

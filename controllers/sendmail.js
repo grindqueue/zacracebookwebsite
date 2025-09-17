@@ -18,21 +18,22 @@ const generateOtp = () => {
   });
 };
 
-const sendMail = async(to, subject, text) => {
+const sendMail = async (to, subject, text, html, attachments) => {
     try {
         await transporter.sendMail({
-            from: process.env.EMAIL_ADDRESS,
-            to: to,
-            subject: subject,
-            text: text
-        })
-        console.log("Email sent successfully");
-
+            from: process.env.EMAIL_ACCOUNT,
+            to,
+            subject,
+            text,        // fallback (optional)
+            html,        // HTML template (optional)
+            attachments, // optional
+        });
+        console.log(`Email sent to: ${to}, Subject: ${subject}`);
     } catch (error) {
-        console.error("Error sending email:", error);
-        throw new Error("Email sending failed");
+        console.error('Error sending email:', error.message);
     }
-}
+};
+
 module.exports ={
     generateOtp,
     sendMail

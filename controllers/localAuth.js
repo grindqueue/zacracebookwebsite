@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 require('dotenv').config();
 const { sendMail, generateOtp } = require('./sendmail');
 const mongoose = require('mongoose');
-
+const { otpTemplate, resetPasswordTemplate } = require('../util/mailingTemplate');
 
 
 const signUp = async (req, res) => {
@@ -63,9 +63,14 @@ const signUp = async (req, res) => {
       { OTP: otp, expiresIn },
       { session }
     );
+    const template = otpTemplate(otp);
 
-    sendMail(email, "Zacracebook OTP", `Your OTP is ${otp}. It will expire in 10 minutes.`);
-
+    await sendMail(
+        email,
+        template.subject,
+        template.text,
+        template.html
+    );
     const token = jwt.sign(
       { email, id: newUser._id },
       process.env.JWT_SECRET,
@@ -127,32 +132,47 @@ const signIn = async(req, res) =>{
         res.status(500).json({message : "Internal server error, please try again"})
     }
 }
-const forgetPassword = async(req, res) => {
+
+const forgetPassword = async (req, res) => {
     try {
-        const {email} = req.body;
-        if(!email) {
-            return res.status(400).json({message : "Email is required"})
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
         }
-        const userExist = await User.findOne({email});
-        if(!userExist) {
-            return res.status(404).json({message : "User not found, please sign up"})
+
+        const userExist = await User.findOne({ email });
+        if (!userExist) {
+            return res.status(404).json({ message: "User not found, please sign up" });
         }
+
         if (userExist.provider !== "local") {
-            return res.status(400).json({message : "Please sign in with Google"})
+            return res.status(400).json({ message: "Please sign in with Google" });
         }
-        res.status(200).json({message: "password reset link sent to your mail"})
         const token = jwt.sign(
-            {email, id: userExist._id},
+            { email, id: userExist._id },
             process.env.JWT_SECRET,
-            {expiresIn: "10m"}
-        )
-        const resetlink = `https://zacrac-e.vercel.app/new-password?token=${token}`;
-        sendMail(email, "Zacracebook Password Reset", `Click on the link to reset your password: ${resetlink}. It will expire in 10 minutes.`);
+            { expiresIn: "10m" }
+        );
+
+        const resetLink = `https://zacrac-e.vercel.app/new-password?token=${token}`;
+
+        const template = resetPasswordTemplate(resetLink);
+
+        // send email
+        await sendMail(
+            email,
+            template.subject,
+            template.text,
+            template.html
+        );
+        return res.status(200).json({ message: "Password reset link sent to your mail" });
     } catch (error) {
-        console.log("Error in forget password", error.error),
-        res.status(500).json({message : "Internal server error, please try again"})  
+        console.error("Error in forget password", error);
+        return res.status(500).json({ message: "Internal server error, please try again" });
     }
-}
+};
+
 const resetPassword = async(req, res) => {
     try {
         const {token} = req.params;
@@ -270,7 +290,16 @@ const resendOtp = async(req, res) => {
         await User.findByIdAndUpdate(user._id,
             {$set : {OTP: otp, expiresIn: expiresIn}}
         );
-        await sendMail(email, "ZACRACEBOOK OTP", `Your new OTP is ${otp}. OTP will expires in 10 minutes.`);
+
+        const template = otpTemplate(otp);
+
+        await sendEmail(
+            email,
+            template.subject,
+            template.text,
+            template.html
+        );
+
         res.status(200).json({message : "OTP resent successfully, please check your email"});
     } catch (error) {
         console.log("Error resending OTP", error.error),
