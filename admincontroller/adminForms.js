@@ -319,5 +319,6 @@ module.exports = {
     adminSignin,
     getAdminDashboard,
     getTransactionHistory,
-    streamBookFile
+    streamBookFile,
+    streamBookFileWithPreview
 };
