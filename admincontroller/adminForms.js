@@ -8,38 +8,37 @@ const axios = require('axios');
 
 require('dotenv').config()
 
+
 const getPurchasedBooks = async (req, res) => {
   try {
     const userId = req.params.userId;
-
-    const user = await User.findById(userId)
+    const completedOrders = await Order.find({ 
+        user: userId, 
+        status: "completed" 
+      })
       .populate({
-        path: "purchasedBooks.product",
+        path: "product",
         select: "title author coverImageUrl formats"
       });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!completedOrders || completedOrders.length === 0) {
+      return res.status(404).json({ message: "No completed purchases found" });
     }
 
-    if (user.purchasedBooks.length === 0) {
-      return res.status(404).json({ message: "No purchased books found" });
-    }
-    const purchases = user.purchasedBooks.map(p => {
-      return {
-        title: p.product?.title,
-        author: p.product?.author,
-        coverImageUrl: p.product?.coverImageUrl,
-        format: p.formatType,
-        price: p.product?.formats.find(f => f.type === p.formatType)?.price,
-        purchasedAt: p.purchasedAt
-      };
-    });
+    const purchases = completedOrders.map(order => ({
+      title: order.product?.title,
+      author: order.product?.author,
+      coverImageUrl: order.product?.coverImageUrl,
+      format: order.format,
+      price: order.price, // pulled directly from Order
+      purchasedAt: order.createdAt
+    }));
 
     res.status(200).json({
       message: "Purchased books fetched successfully",
       purchases
     });
+
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Something went wrong fetching purchases" });
